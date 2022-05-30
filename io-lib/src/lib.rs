@@ -4,32 +4,6 @@ use std::{
     io::Read
 };
 
-pub fn get_raw_string(path: PathBuf) -> std::io::Result<String> {
-    let mut file = File::open(path)?;
-    let mut buffer = String::new();
-    file.read_to_string(&mut buffer)?;
-
-    Ok(buffer)
-}
-
-pub fn get_string(path: PathBuf) -> std::io::Result<String> {
-    Ok(get_raw_string(path)?
-        .chars()
-        .filter(|x| *x != '\n')
-        .collect::<String>()
-    )
-}
-
-pub fn get_vec(path: PathBuf) -> std::io::Result<Vec<String>> {
-    let mut input = get_raw_string(path)?
-        .split('\n')
-        .map(|xs| xs.to_string())
-        .collect::<Vec<String>>();
-    input.pop();
-
-    Ok(input)
-}
-
 enum DataType {
     Raw,
     Trimmed
