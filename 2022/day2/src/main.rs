@@ -28,6 +28,7 @@ impl From<Answer> for i32 {
     }
 }
 
+// Cue the operator abuse
 impl std::ops::Add for Answer {
     type Output = i32;
 
@@ -53,18 +54,57 @@ impl std::ops::Add for Answer {
     }
 }
 
+// Rock = Lose
+// Paper = Draw
+// Scissors = Win
+
+impl std::ops::Mul for Answer {
+    type Output = i32;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        use Answer::*;
+        
+        match (self, rhs) {
+            (lhs, Rock) => i32::from(-(-lhs)),
+            (lhs, Paper) => 3 + i32::from(lhs),
+            (lhs, Scissors) => 6 + i32::from(-lhs)
+        }
+    }
+}
+
+impl std::ops::Neg for Answer {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        use Answer::*;
+
+        match self {
+            Rock => Paper,
+            Paper => Scissors,
+            Scissors => Rock,
+        }
+    }
+}
+
 fn main() {
     let sample = Sample::new("sample.txt")
         .read()
         .unwrap()
         .get_raw()
-        .to_string();
+        .to_owned();
 
-    let answer: i32 = sample.trim_end()
+    let input_iter = sample.trim_end()
         .split('\n')
-        .map(|xs| xs.split_whitespace().map(Answer::from).collect::<Vec<Answer>>())
-        .map(|xs| xs[0] + xs[1])
-        .sum();
+        .map(|xs| xs.split_whitespace().map(Answer::from).collect::<Vec<Answer>>());
 
-    println!("{answer}");
+
+    let first_answer: i32 = input_iter.clone()
+        .map(|xs| xs[0] + xs[1]).sum();
+
+    let second_answer: i32 = input_iter
+        .map(|xs| xs[0] * xs[1]).sum();
+
+
+    println!("First answer: {first_answer}");
+    println!("Second answer: {second_answer}");
 }
