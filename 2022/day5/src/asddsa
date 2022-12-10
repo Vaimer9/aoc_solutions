@@ -1,0 +1,108 @@
+#![feature(map_many_mut)]
+
+use io_lib::Sample;
+use std::collections::HashMap;
+
+struct StackList(HashMap<u32, Vec<char>>);
+
+struct Operation {
+    quantity: u32,
+    src: u32,
+    dest: u32
+}
+
+impl StackList {
+    fn apply_op(&mut self, op: Operation) {
+        let rx = self.0.get_many_mut([&op.src, &op.dest]).unwrap();
+
+        for _ in 0..op.quantity {
+            if let Some(p) = rx[1].pop() {
+                rx[0].push(p);
+            } else {
+                continue;
+            }
+        }
+    }
+
+    fn get_word(self) -> String {
+        let mut rt = String::new();
+
+        for value in self.0.values() {
+            if let Some(val) = value.first() {
+                rt.push(*val);
+            } else {
+                continue;
+            }
+        }
+
+        rt
+    }
+}
+
+impl From<&str> for StackList {
+    fn from(s: &str) -> Self {
+        let mut map = HashMap::new();
+
+        for i in 1..9 {
+            map.insert(i, Vec::new());
+        }
+        
+        s.split('\n')
+            .for_each(|s| {
+                s.split_whitespace()
+                    .for_each(|s| {
+                        s.chars()
+                            .filter(|xs| *xs != '[' || *xs != ']')
+                            .enumerate()
+                            .for_each(|(index, val)| {
+                                let mut map = map.clone(); // ugghhh
+                                let list = map.get_mut(&(index as u32)).unwrap();
+                                list.push(val);
+                        });
+                    });
+            });
+
+        Self(map)
+    }
+}
+
+impl From<&str> for Operation {
+    fn from(s: &str) -> Self {
+        let info = s.replace("move", "").replace("from", "").replace("to", "")
+            .split_whitespace()
+            .map(|s| s.parse().unwrap())
+            .collect::<Vec<u32>>();
+
+        Operation {
+            quantity: info[0],
+            src: info[1],
+            dest: info[2]
+        }
+    }
+}
+
+fn main() {
+    let sample = Sample::new("sample.txt")
+        .read().unwrap()
+        .get_vec();
+
+    // I hope god forgives me for this
+    let mut stacklist = StackList(HashMap::from([
+        (1, vec!['D', 'T', 'W', 'F', 'J', 'S', 'H', 'N']),
+        (2, vec!['H', 'R', 'P', 'Q', 'T', 'N', 'B', 'G']),
+        (3, vec!['L', 'Q', 'V']),
+        (4, vec!['N', 'B', 'S', 'W', 'R', 'Q']),
+        (5, vec!['N', 'D', 'F', 'T', 'V', 'M', 'B']),
+        (6, vec!['M', 'D', 'B', 'V', 'H', 'T', 'R']),
+        (7, vec!['D', 'B', 'Q', 'J']),
+        (8, vec!['D', 'N', 'J', 'V', 'R', 'Z', 'H', 'Q']),
+        (9, vec!['B', 'N', 'H', 'M', 'S'])
+    ]));
+    
+    for x in sample.iter() {
+        let op = Operation::from(x.as_str());
+        stacklist.apply_op(op)
+    }
+    println!("{}", stacklist.get_word());
+
+}
