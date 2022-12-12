@@ -39,12 +39,11 @@ impl Sample {
     }
 
     pub fn get_vec(&self) -> Vec<String> {
-        let mut vec = self.get_raw()
-            .split('\n')
+        let vec = self
+            .get_raw()
+            .lines()
             .map(ToString::to_string)
             .collect::<Vec<String>>();
-
-        vec.pop(); // Remove the last element: "hey\n" -> ["hey", ""]
         vec
     }
 
