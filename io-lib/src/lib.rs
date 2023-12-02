@@ -23,7 +23,7 @@ impl Sample {
             state: DataType::Raw
         }
     }
-    
+
     pub fn read(mut self) -> std::io::Result<Self> {
         let mut file = File::open(&self.path)?;
         file.read_to_string(&mut self.raw)?;
